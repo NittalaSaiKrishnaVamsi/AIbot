@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { speakText } from '../utils/tts';
 import { ToastContainer, toast } from 'react-toastify';
