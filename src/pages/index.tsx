@@ -6,14 +6,16 @@ import { speakText } from '../utils/tts';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Moon, Sun, Mic, Send, Volume2, VolumeX } from 'lucide-react';
-import dynamic from 'next/dynamic';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
-const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
+// Fix: Remove 'any' type
+const SpeechRecognition =
+  typeof window !== 'undefined' && 'SpeechRecognition' in window
+    ? window.SpeechRecognition || window.webkitSpeechRecognition
+    : null;
+    const recognition: typeof window.SpeechRecognition | null = SpeechRecognition ? new SpeechRecognition() : null;
 
-const chatAnimationPath = '/assets/chat.json';
-const micAnimationPath = '/assets/mic.json';
 
 export default function Home() {
   const [message, setMessage] = useState('');
@@ -24,17 +26,13 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(false);
   const responseRef = useRef<HTMLDivElement>(null);
 
-  const SpeechRecognition =
-    typeof window !== 'undefined' ? (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition : null;
-  const recognition = SpeechRecognition ? new SpeechRecognition() : null;
-
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setMessages([{ type: 'bot', text: 'Hello! How can I assist you today?' }]);
     }
   }, []);
 
-  const sendMessage = async (event?: React.MouseEvent<HTMLButtonElement>) => {
+  const sendMessage = async (event?: React.MouseEvent<HTMLButtonElement> | React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (event) event.preventDefault();
 
     if (!message.trim()) {
@@ -131,7 +129,7 @@ export default function Home() {
           value={message} 
           onChange={(e) => setMessage(e.target.value)}
           placeholder='Type your message...' 
-          onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage(e as any)} 
+          onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage(e)} 
         />
         
         <button onClick={sendMessage} className='bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700' disabled={loading}> 
